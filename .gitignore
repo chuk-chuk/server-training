@@ -1,0 +1,15 @@
+# OS
+# ===========
+.DS_Store
+
+# Node and related ecosystem
+# ==========================
+node_modules/
+.idea/
+package-lock.json
+.env
+
+# VSCode editor
+# =============
+.vscode
+tsconfig.tsbuildinfo
