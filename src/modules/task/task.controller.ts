@@ -1,78 +1,51 @@
 import { Request, Response, NextFunction } from "express";
-import { TaskModel } from "../../models/task.model";
-import { Error } from "mongoose";
+import {
+  createNewTask,
+  deleteExistingTask,
+  getAllTasks,
+  updateExistingTask,
+} from "./task.businessLogic";
+
+const getTasks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { code, data } = await getAllTasks();
+    res.status(code).send(data);
+  } catch (error) {
+    res.status(500).send({ message: "Error retrieving all tasks" });
+    next(error);
+  }
+};
 
 const createTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { task } = req.body;
-    const existingTask = await TaskModel.findOne({
-      task,
-    });
-
-    if (existingTask) {
-      res.status(409);
-      const error = new Error("Task already exists");
-      return next(error);
-    }
-
-    const newTask = await TaskModel.create(task);
-    console.log("New task has been created");
-    res.status(200).json(newTask);
+    const createdObject = req.body || {};
+    const { code, data } = await createNewTask(createdObject);
+    res.status(code).json(data);
   } catch (error) {
+    res.status(500).send({ message: "Error creating a new task" });
     next(error);
   }
 };
 
 const deleteTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const task = await TaskModel.findOne({ _id: id });
-
-    if (!task) {
-      return next();
-    }
-
-    await TaskModel.remove({
-      _id: id,
-    });
-
-    res.json({
-      message: "Success",
-    });
+    const { id } = req.params as any;
+    const { code, data } = await deleteExistingTask(id);
+    res.status(code).json(data);
   } catch (error) {
-    next(error);
-  }
-};
-
-const getTasks = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const tasks = await TaskModel.find({});
-    res.json(tasks);
-  } catch (error) {
+    res.status(500).send({ message: "Error deleting a task" });
     next(error);
   }
 };
 
 const updateTask = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const { task } = req.body;
-
-    const existingTask = await TaskModel.findOne({
-      _id: id,
-    });
-
-    if (!existingTask) {
-      return next();
-    }
-
-    const updatedTask = await TaskModel.findOneAndUpdate({ _id: id }, task, {
-      new: true,
-      upsert: true,
-    });
-
-    res.json(updatedTask);
+    const { id } = req.params as any;
+    const updatedObject = req.body || {};
+    const { code, data } = await updateExistingTask(id, updatedObject);
+    res.status(code).json(data);
   } catch (error) {
+    res.status(500).send({ message: "Error updating the task" });
     next(error);
   }
 };

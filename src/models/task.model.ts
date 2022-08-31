@@ -1,19 +1,11 @@
-import { Schema, model } from "mongoose";
+import { Schema } from "mongoose";
+import { ITask } from "../modules/task/types";
 
-interface ITask {
-  name: string;
-}
-
-const TaskSchema = new Schema<ITask>(
+export const TaskSchema = new Schema<ITask>(
   {
-    name: { type: String, required: true },
+    description: { type: String, required: true },
   },
-  {
-    timestamps: {
-      createdAt: "createdAt",
-      updatedAt: "updatedAt",
-    },
-  }
+  { timestamps: true }
 );
 
-export const TaskModel = model<ITask>("User", TaskSchema);
+export const TasksCollection = "tasks";

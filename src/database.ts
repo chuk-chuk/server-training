@@ -1,16 +1,22 @@
-import * as mongoDB from "mongodb";
 import * as dotenv from "dotenv";
-/** As this service will be connecting to the database,
- * it will need to use the MongDB NodeJS driver and .env config. */
+import { createConnection, disconnect } from "mongoose";
+import { InitMongoModels } from "./models/initModels";
 
-export async function connectToDatabase() {
+const connectToExternalDatabase = async () => {
   dotenv.config();
 
-  const client: mongoDB.MongoClient = new mongoDB.MongoClient(
-    process.env.MONGO_URI!
-  );
+  console.log("=> new connection to database");
 
-  await client.connect();
+  const connection = await createConnection(process.env.MONGO_URI!);
+  console.log("✅ Successfully established connection");
 
-  console.log("Successfully established connection");
-}
+  return InitMongoModels.init(connection);
+};
+
+export const connectToDatabase = async () => {
+  return await connectToExternalDatabase();
+};
+
+export const closeAllConnections = async () => {
+  return await disconnect();
+};
